@@ -42,6 +42,7 @@ Server::serve() {
 
 void
 Server::handle(int client) {
+     Message message = new Message();
     // loop to handle all requests
     while (1) {
         // get a request
@@ -51,7 +52,7 @@ Server::handle(int client) {
             break;
         
         // parse request
-        Message message = parse_request(request);
+        Message message = parse_request(request, message);
         // get more characters if needed
         if (message.needed)
             get_value(client,message);
@@ -65,11 +66,21 @@ Server::handle(int client) {
 }
 
 Message
-Server::parse_request(string request){
+Server::parse_request(string request, Message message){
+
+    /*He had this method in getrequest
+        string cache = "";
+        while(chache.find("\n")) != ...){
+             string chache = get_request(client);
+             sring.substr();//find gets the index and you chop it off up to the new line. 
+        }
+        cache
+    */
 
     string command;
     string filename;
-    int numberOfBytes;
+    string numberOfBytes = 0;
+    string bytes;
 
     std::istringstream iss(request);
     iss >> command;
@@ -77,6 +88,50 @@ Server::parse_request(string request){
     if(command == "store"){
         iss >> filename;
         iss >> numberOfBytes;
+
+        stringstream ss(numberOfBytes);
+        int numbytes;
+        ss >> numbytes;
+       
+        message.command = "stored";
+        message.params[filename, numberOfBytes];
+        message.numberOfBytes = numbytes;
+        message.needed = true;
+       
+
+        iss >> bytes;
+        if(iss.fail())
+            return message;
+        else{
+            message.cache += bytes;  
+            return message;
+        }
+
+    }
+
+}
+void
+Server::get_value(int client, Message message){
+/*
+        while(cache.length() <= bytes.needed){
+            cache = get_request();
+        }
+        cache.substr()
+        if()
+        getvalue();
+    else
+        cache;*/
+
+
+        int sizeOfCache = message.cache.length();
+        int bytesToBeCached = message.numberOfBytes - sizeOfCache;
+
+        While(bytesToBeCached > 0){
+            sizeOfCache = message.cache.length();
+            bytesToBeCached = message.numberOfBytes - sizeOfCache;
+
+            string bytes = get_request(client);
+            message.cache += bytes;  
     }
 }
 
